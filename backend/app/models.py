@@ -1,7 +1,17 @@
 import datetime
 import uuid
 
-from sqlalchemy import JSON, Column, Date, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+)
 
 from .database import Base
 
@@ -45,6 +55,7 @@ class Transaction(Base):
     status = Column(
         String, nullable=False, default="UNMATCHED"
     )  # UNMATCHED, MATCHED, PERSONAL, IGNORED
+    is_edited = Column(Boolean, default=False, nullable=False)
     notes = Column(String, nullable=True)
 
 

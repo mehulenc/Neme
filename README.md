@@ -1,10 +1,4 @@
-<div align="center">
-  <h1>NEME</h1>
-  <p><b>Your Personal Financial Operating System</b></p>
-  <p><i>Reconcile. Track. Trust.</i></p>
-</div>
-
-<br>
+# NEME - Your Personal Financial Operating System
 
 ## What is Neme?
 
@@ -23,8 +17,17 @@ The engine automatically suggests matches by comparing amounts (both `paid_share
 **CSV Import**
 Ingest bank statements with duplicate detection and collision handling. Currently supports HSBC, with more parsers planned.
 
-**Stale Link Detection**
-When a Splitwise expense changes remotely, active reconciliation links are flagged for review.
+**Stale Link & Conflict Resolution**
+When a Splitwise expense changes remotely, active links are flagged for review. A dedicated conflict review UI lets you Approve or Dismiss discrepancies side-by-side.
+
+**Manual Edits & Audit Trails**
+Edit bank counterparties, amounts, or dates locally. Neme tracks these as manual edits with an `is_edited` flag, ensuring you never lose sight of the original statement data.
+
+**Personalized UX**
+- **Dynamic Currencies**: Automatic symbol mapping ($, £, €, ₹) based on transaction data.
+- **Splitwise Avatars**: Real-time profile pictures fetched from your Splitwise network.
+- **Expandable Cards**: View full participant breakdowns (paid vs. owed) for any expense.
+- **Optimized Selection**: Use `Esc` to deselect, click-outside to collapse, and auto-select recommendation pairs.
 
 **Dark Mode**
 Full light/dark theme support with a Teal accent palette, Space Grotesk typography, and localStorage persistence.
@@ -59,7 +62,7 @@ uvicorn app.main:app --reload --port 8000
 
 Create a `.env` file in `backend/` with your Splitwise credentials:
 
-```
+```env
 SPLITWISE_CONSUMER_KEY=your_key
 SPLITWISE_CONSUMER_SECRET=your_secret
 ```
@@ -98,3 +101,4 @@ Detailed docs live in the [`docs/`](docs/) folder:
 - [Domain Model](docs/domain-model.md) — Entity definitions, invariants, and status model
 - [Architecture](docs/architecture.md) — System diagram, module descriptions, and data flows
 - [Decisions](docs/decisions.md) — Durable technical decisions and open questions
+- [Memory](docs/MEMORY.md) — Chronological log of learnings, milestones, and logic evolution

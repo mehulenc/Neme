@@ -111,12 +111,17 @@ class SplitwiseClient:
         return response.json().get("groups", [])
 
     async def create_expense(self, data: dict) -> list:
-        # Splitwise expects nested keys like users__0__user_id if passed as JSON,
-        # but let's send it as JSON payload and see.
-        # Actually Splitwise API expects JSON payload directly.
         response = await self.client.post("/create_expense", json=data)
         if response.status_code != 200:
             print(f"Error creating expense: {response.text}")
+        response.raise_for_status()
+        return response.json().get("expenses", [])
+
+    async def update_expense(self, expense_id: str, data: dict) -> list:
+        # Splitwise expects a POST to /update_expense/:id
+        response = await self.client.post(f"/update_expense/{expense_id}", json=data)
+        if response.status_code != 200:
+            print(f"Error updating expense: {response.text}")
         response.raise_for_status()
         return response.json().get("expenses", [])
 

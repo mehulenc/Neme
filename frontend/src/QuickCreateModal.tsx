@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { X, CheckCircle2, Loader2, Plus, Users, User } from "lucide-react";
 
 interface QuickCreateModalProps {
@@ -40,6 +40,16 @@ export default function QuickCreateModal({
   const [memberState, setMemberState] = useState<
     Record<number, { paid: string; splitVal: string; include: boolean }>
   >({});
+  const currencyCode = transaction.currency_code || "USD";
+  const currencySymbol = useMemo(() => {
+    const map: Record<string, string> = {
+      USD: "$",
+      GBP: "£",
+      EUR: "€",
+      INR: "₹",
+    };
+    return map[currencyCode] || currencyCode + " ";
+  }, [currencyCode]);
 
   useEffect(() => {
     Promise.all([
@@ -447,12 +457,12 @@ export default function QuickCreateModal({
             <div className="border border-border rounded-xl overflow-hidden">
               <div className="bg-muted/50 border-b border-border px-4 py-2 text-xs font-semibold text-muted-foreground grid grid-cols-12 gap-2">
                 <div className="col-span-5">Member</div>
-                <div className="col-span-3">Paid ($)</div>
+                <div className="col-span-3">Paid ({currencySymbol})</div>
                 <div className="col-span-4">
                   {splitMode === "EQUALLY"
                     ? "Include?"
                     : splitMode === "EXACT"
-                      ? "Owes ($)"
+                      ? `Owes (${currencySymbol})`
                       : splitMode === "PERCENTAGE"
                         ? "%"
                         : "Shares"}
@@ -466,9 +476,9 @@ export default function QuickCreateModal({
                   >
                     <div className="col-span-5 flex items-center space-x-2">
                       <div className="w-6 h-6 rounded-full bg-muted-foreground/30 overflow-hidden flex-shrink-0">
-                        {m.picture?.small ? (
+                        {m.picture?.medium || m.picture?.small ? (
                           <img
-                            src={m.picture.small}
+                            src={m.picture.medium || m.picture.small}
                             alt="Avatar"
                             className="w-full h-full object-cover"
                           />

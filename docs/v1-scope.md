@@ -41,6 +41,12 @@ Build a private financial app that can:
 - Suggested matches based on heuristics (amount + date proximity)
 - Stale-link visibility
 - Quick-create Splitwise expense from a transaction
+- **V1.5 Improvements**:
+    - Manual editability for transactions and Splitwise expenses
+    - Expandable expense cards with full participant breakdowns
+    - Dynamic currency support and symbol mapping
+    - Personalized profile pictures from Splitwise data
+    - Optimized selection logic (Escape to deselect, click-outside, recommendation auto-selection)
 
 ### Basic metadata
 

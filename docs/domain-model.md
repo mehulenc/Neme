@@ -41,11 +41,12 @@ Fields: `id`, `account_id`, `source_type`, `filename`, `parser_version`, `import
 
 Represents an imported bank/card transaction.
 
-Fields: `id`, `account_id`, `import_batch_id`, `transaction_date`, `amount_minor_units`, `currency_code`, `counterparty`, `raw_description`, `raw_row_data`, `status`, `notes`
+Fields: `id`, `account_id`, `import_batch_id`, `transaction_date`, `amount_minor_units`, `currency_code`, `counterparty`, `raw_description`, `raw_row_data`, `status`, `notes`, `is_edited`
 
 Status values: `UNMATCHED`, `MATCHED`, `PERSONAL`, `IGNORED`
 
 Notes:
+
 - `raw_row_data` preserves the original source row for debugging.
 - Negative `amount_minor_units` indicates a debit.
 
@@ -58,6 +59,7 @@ Fields: `id` (Splitwise ID), `expense_date`, `total_amount_minor_units`, `curren
 Status values: `UNMATCHED`, `MATCHED`, `IGNORED`
 
 Notes:
+
 - This is a local mirror, not just a remote pointer.
 - `users_data` stores the full payers/payees array from Splitwise, used by the heuristic engine to extract the current user's `paid_share`.
 
@@ -71,6 +73,7 @@ Link types: `manual`, `suggested`, `quick_create`
 Status values: `ACTIVE`, `STALE_REVIEW_REQUIRED`
 
 Notes:
+
 - One transaction may link to many Splitwise expenses.
 - One Splitwise expense may link to many transactions.
 - `mapped_amount_minor_units` captures partial matching.
