@@ -8,6 +8,7 @@
     - The `users` array in an expense object contains nested `user` objects which hold the `picture` data.
     - Profile pictures come in `small`, `medium`, and `large` variants. `medium` is preferred for standard UI components to balance quality and performance.
 - **Audit Trails**: Manual edits should be tracked explicitly (e.g., `is_edited` flag) to distinguish between raw imported data and user-modified records.
+- **Stale Link Detection**: Reconciliation links must track a `STALE_REVIEW_REQUIRED` status to handle remote Splitwise updates without breaking local data integrity.
 
 ### Frontend & UX
 - **Global Event Listeners**: Implementing "Escape to deselect" requires global keyboard listeners. It's important to clean these up on component unmount to prevent memory leaks or unexpected behavior.
@@ -18,7 +19,9 @@
 ## Implementation Patterns
 - **Sync Pattern**: For Splitwise, the pattern is: Remote Edit -> Remote API Call -> Local Sync Trigger -> UI Refresh. This ensures the local database remains a faithful mirror of the source of truth.
 - **Recommendation UI**: Suggested matches should be "one-click actionable". Selecting one side of a recommendation should automatically select its counterpart.
+- **Heuristic Engine**: Use a ±2 day date window and ±5.00 units tolerance for amount matching to account for bank processing delays and minor currency rounding.
 
 ## Design Decisions
 - **Transparency**: Matched items should always show what they are linked to, even if they are "stricken off" in the list. This provides an audit trail for the user.
 - **Personalization**: Using real profile pictures instead of generic icons significantly improves the "premium" feel of a finance app.
+- **Bi-Directional Navigation**: Users should be able to "jump" between matched counterparts (Bank -> Splitwise and vice-versa) directly from the item details or action bar.
