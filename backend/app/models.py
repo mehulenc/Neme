@@ -60,6 +60,7 @@ class SplitwiseExpense(Base):
     status = Column(
         String, nullable=False, default="UNMATCHED"
     )  # UNMATCHED, MATCHED, IGNORED
+    users_data = Column(JSON, nullable=True)  # Stores payers and payees raw data
 
 
 class ReconciliationLink(Base):
@@ -75,3 +76,10 @@ class ReconciliationLink(Base):
     status = Column(
         String, nullable=False, default="ACTIVE"
     )  # ACTIVE, STALE_REVIEW_REQUIRED
+
+
+class SystemSetting(Base):
+    __tablename__ = "system_settings"
+
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=False)
