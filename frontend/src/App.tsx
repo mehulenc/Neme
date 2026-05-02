@@ -7,6 +7,7 @@ import {
   UploadCloud,
   Moon,
   Sun,
+  Sparkles,
 } from "lucide-react";
 import QuickCreateModal from "./QuickCreateModal";
 import UploadModal from "./UploadModal";
@@ -28,6 +29,13 @@ interface Expense {
   users_data: any;
 }
 
+interface SuggestedMatch {
+  transaction_id: string;
+  expense_id: string;
+  confidence: string;
+  reason: string;
+}
+
 export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -41,6 +49,9 @@ export default function App() {
     null,
   );
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [suggestedMatches, setSuggestedMatches] = useState<SuggestedMatch[]>(
+    [],
+  );
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("neme-theme") === "dark";
   });
@@ -70,6 +81,7 @@ export default function App() {
       const data = await res.json();
       setTransactions(data.transactions);
       setExpenses(data.expenses);
+      setSuggestedMatches(data.suggested_matches || []);
       setSelectedTxnIds(new Set());
       setSelectedExpenseId(null);
     } catch (e) {
@@ -77,6 +89,11 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAcceptSuggestion = (match: SuggestedMatch) => {
+    setSelectedTxnIds(new Set([match.transaction_id]));
+    setSelectedExpenseId(match.expense_id);
   };
 
   useEffect(() => {
@@ -189,6 +206,13 @@ export default function App() {
                 cardStyle = "border-primary bg-primary/10 shadow-sm";
               }
 
+              const suggestion = suggestedMatches.find(
+                (s) => s.transaction_id === txn.id,
+              );
+              const matchedExpense = suggestion
+                ? expenses.find((e) => e.id === suggestion.expense_id)
+                : null;
+
               return (
                 <div
                   key={txn.id}
@@ -224,6 +248,52 @@ export default function App() {
                     <CreditCard className="h-3.5 w-3.5 mr-1.5" />
                     {txn.transaction_date}
                   </div>
+
+                  {suggestion && matchedExpense && isSelectable && (
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAcceptSuggestion(suggestion);
+                      }}
+                      className={`mt-3 p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm ${
+                        suggestion.confidence === "high"
+                          ? "border-primary/40 bg-primary/5 hover:bg-primary/10"
+                          : "border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Sparkles
+                          className={`h-3.5 w-3.5 ${
+                            suggestion.confidence === "high"
+                              ? "text-primary"
+                              : "text-amber-500"
+                          }`}
+                        />
+                        <span
+                          className={`text-xs font-semibold ${
+                            suggestion.confidence === "high"
+                              ? "text-primary"
+                              : "text-amber-500"
+                          }`}
+                        >
+                          {suggestion.confidence === "high"
+                            ? "Strong match"
+                            : "Possible match"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-card-foreground font-medium line-clamp-1">
+                        {matchedExpense.description} &middot;{" "}
+                        <span className="font-mono">
+                          {(
+                            matchedExpense.total_amount_minor_units / 100
+                          ).toFixed(2)}
+                        </span>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {suggestion.reason}
+                      </p>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -262,6 +332,13 @@ export default function App() {
                 cardStyle = "border-primary bg-primary/10 shadow-sm";
               }
 
+              const suggestion = suggestedMatches.find(
+                (s) => s.expense_id === exp.id,
+              );
+              const matchedTxn = suggestion
+                ? transactions.find((t) => t.id === suggestion.transaction_id)
+                : null;
+
               return (
                 <div
                   key={exp.id}
@@ -294,6 +371,52 @@ export default function App() {
                   >
                     {exp.expense_date.split("T")[0]}
                   </div>
+
+                  {suggestion && matchedTxn && isSelectable && (
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAcceptSuggestion(suggestion);
+                      }}
+                      className={`mt-3 p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm ${
+                        suggestion.confidence === "high"
+                          ? "border-primary/40 bg-primary/5 hover:bg-primary/10"
+                          : "border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Sparkles
+                          className={`h-3.5 w-3.5 ${
+                            suggestion.confidence === "high"
+                              ? "text-primary"
+                              : "text-amber-500"
+                          }`}
+                        />
+                        <span
+                          className={`text-xs font-semibold ${
+                            suggestion.confidence === "high"
+                              ? "text-primary"
+                              : "text-amber-500"
+                          }`}
+                        >
+                          {suggestion.confidence === "high"
+                            ? "Strong match"
+                            : "Possible match"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-card-foreground font-medium line-clamp-1">
+                        {matchedTxn.counterparty} &middot;{" "}
+                        <span className="font-mono">
+                          {(
+                            Math.abs(matchedTxn.amount_minor_units) / 100
+                          ).toFixed(2)}
+                        </span>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {suggestion.reason}
+                      </p>
+                    </div>
+                  )}
                 </div>
               );
             })}

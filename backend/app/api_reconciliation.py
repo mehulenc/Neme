@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from . import database, models
+from .heuristics import compute_suggestions
 
 router = APIRouter(prefix="/api/reconciliation", tags=["Reconciliation"])
 
@@ -26,7 +27,23 @@ def get_dashboard_data(db: Session = Depends(database.get_db)):
         .all()
     )
 
-    return {"transactions": transactions, "expenses": expenses}
+    # Compute heuristic suggestions for unmatched items
+    suggested_matches = compute_suggestions(db)
+
+    # Get the current user's Splitwise ID for frontend context
+    user_id_setting = (
+        db.query(models.SystemSetting)
+        .filter(models.SystemSetting.key == "splitwise_user_id")
+        .first()
+    )
+    splitwise_user_id = user_id_setting.value if user_id_setting else None
+
+    return {
+        "transactions": transactions,
+        "expenses": expenses,
+        "suggested_matches": suggested_matches,
+        "splitwise_user_id": splitwise_user_id,
+    }
 
 
 class LinkRequest(BaseModel):

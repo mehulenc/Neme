@@ -40,6 +40,33 @@ async def splitwise_callback(code: str):
         if not access_token:
             raise HTTPException(status_code=400, detail="No access token received")
         splitwise.save_token(access_token)
+
+        # Persist the current user's Splitwise ID for heuristic matching
+        client = splitwise.SplitwiseClient()
+        try:
+            user_info = await client.get_current_user()
+            user_id = str(user_info.get("id", ""))
+            if user_id:
+                db = database.SessionLocal()
+                try:
+                    setting = (
+                        db.query(models.SystemSetting)
+                        .filter(models.SystemSetting.key == "splitwise_user_id")
+                        .first()
+                    )
+                    if not setting:
+                        setting = models.SystemSetting(
+                            key="splitwise_user_id", value=user_id
+                        )
+                        db.add(setting)
+                    else:
+                        setting.value = user_id
+                    db.commit()
+                finally:
+                    db.close()
+        finally:
+            await client.close()
+
         return {
             "message": "Splitwise authentication successful. You can close this tab."
         }
