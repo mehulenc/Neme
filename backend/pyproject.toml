@@ -1,7 +1,7 @@
 [project]
-name = "backend"
+name = "neme-backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Neme Financial OS — backend API"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -10,6 +10,7 @@ dependencies = [
     "httpx>=0.28.1",
     "pandas>=3.0.2",
     "pydantic>=2.13.3",
+    "python-dotenv>=1.0.0",
     "sqlalchemy>=2.0.49",
     "uvicorn[standard]>=0.46.0",
     "python-dateutil>=2.9.0",
@@ -31,3 +32,7 @@ target-version = ["py312"]
 [tool.isort]
 profile = "black"
 line_length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

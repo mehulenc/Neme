@@ -31,8 +31,9 @@ ENV/
 env.bak/
 venv.bak/
 
-# Database
+# Database files — never commit local databases
 *.db
+*.sqlite
 *.sqlite3
 
 # Node
@@ -46,6 +47,15 @@ dist-ssr/
 .idea/
 *.swp
 *.swo
+
+# CSV / financial data — never commit raw data exports
+*.csv
+
+# Lint / build artifacts
+frontend/lint.txt
+
+# Stray dev scripts (not real tests)
+test_regex.py
 
 # OS
 .DS_Store
