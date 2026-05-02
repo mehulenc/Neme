@@ -1,95 +1,100 @@
 <div align="center">
-  <h1 style="font-family: 'Space Grotesk', sans-serif; font-weight: 800; color: #0f766e;">NEME</h1>
-  <p style="font-family: 'Space Mono', monospace;"><b>Your Personal Financial Operating System</b></p>
-  <p><i>Reconcile, Track, and Trust Your Finances</i></p>
+  <h1>NEME</h1>
+  <p><b>Your Personal Financial Operating System</b></p>
+  <p><i>Reconcile. Track. Trust.</i></p>
 </div>
 
 <br>
 
-## Vision
+## What is Neme?
 
-Neme is a private, trustworthy financial operating system designed to bring together the major parts of your financial life. The first iteration focuses squarely on **trust, provenance, and reconciliation**.
+Neme is a private, local-first financial tool that reconciles your bank statements against Splitwise expenses. It gives you a single source of truth for shared spending — with full provenance, auditability, and zero cloud dependency.
 
-Before we build predictive analytics or AI coaching, Neme ensures your ground truth is flawless by seamlessly reconciling your bank statements against your Splitwise expenses.
+The first version focuses squarely on making reconciliation fast, trustworthy, and low-friction. Everything else (analytics, investments, AI insights) comes later, once the foundation is solid.
 
-## Key Features
+## Features
 
-- **Splitwise Reconciliation:** Mirror your Splitwise expenses locally and reconcile them side-by-side with your bank transactions.
-- **Smart Import Engine:** Easily ingest CSV statements (HSBC supported, more coming) with automatic duplicate detection and collision handling.
-- **Semantic Teal Design:** A premium, meticulously crafted interface using **Space Grotesk** and **Space Mono**, with full Light/Dark Mode support powered by Tailwind CSS v4.
-- **Provenance First:** Raw data is preserved. Reconciliations are auditable. Trust is paramount.
+**Splitwise Reconciliation**
+Mirror expenses locally and reconcile them side-by-side with bank transactions. Manual linking, quick-create, and mark-as-personal workflows.
+
+**Heuristic Auto-Suggest**
+The engine automatically suggests matches by comparing amounts (both `paid_share` and `total_amount`, with rounding tolerance) and dates (±2 days). Click a suggestion to link in one action.
+
+**CSV Import**
+Ingest bank statements with duplicate detection and collision handling. Currently supports HSBC, with more parsers planned.
+
+**Stale Link Detection**
+When a Splitwise expense changes remotely, active reconciliation links are flagged for review.
+
+**Dark Mode**
+Full light/dark theme support with a Teal accent palette, Space Grotesk typography, and localStorage persistence.
 
 ## Tech Stack
 
-### Frontend
-- **Framework:** React 19 + TypeScript + Vite
-- **Styling:** Tailwind CSS v4 (Semantic Variable Architecture)
-- **Typography:** Space Grotesk (Headers/UI) & Space Mono (Data)
-- **Icons:** Lucide React
+**Frontend:** React 19, TypeScript, Vite, Tailwind CSS v4 (semantic variables)
 
-### Backend
-- **Framework:** Python 3.12 + FastAPI
-- **Database:** SQLite with SQLAlchemy ORM & Alembic Migrations
-- **Data Processing:** Pandas
-- **Integrations:** Splitwise API
+**Backend:** Python 3.12, FastAPI, SQLAlchemy, Alembic, SQLite
+
+**Integrations:** Splitwise OAuth 2.0
 
 ## Getting Started
 
-### 1. Clone the repository
+### 1. Clone
+
 ```bash
-git clone https://github.com/yourusername/Neme.git
+git clone https://github.com/mehulenc/Neme.git
 cd Neme
 ```
 
-### 2. Set up the Backend
-Navigate to the `backend` directory, create a virtual environment, and run the FastAPI server:
+### 2. Backend
 
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -e ".[dev]"
-
-# Run database migrations
 alembic upgrade head
-
-# Start the server
 uvicorn app.main:app --reload --port 8000
 ```
-*(Note: Create a `.env` file in the backend directory with your `SPLITWISE_API_KEY` to enable syncing.)*
 
-### 3. Set up the Frontend
-Open a new terminal window, navigate to the `frontend` directory, and start the Vite development server:
+Create a `.env` file in `backend/` with your Splitwise credentials:
+
+```
+SPLITWISE_CONSUMER_KEY=your_key
+SPLITWISE_CONSUMER_SECRET=your_secret
+```
+
+Then visit `http://localhost:8000/auth/splitwise/login` to authenticate.
+
+### 3. Frontend
 
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-The application will launch at `http://localhost:5173`.
 
-## Contributing & Code Quality
+Open `http://localhost:5173`.
 
-Neme maintains strict code quality standards to ensure trust and reliability. We use a unified `pre-commit` pipeline to format both the Python backend and the TypeScript frontend.
+## Contributing
 
-**1. Install Pre-commit Hooks**
+Pre-commit hooks enforce formatting on every commit:
+
 ```bash
 pip install pre-commit
 pre-commit install
 ```
 
-**2. Make your changes**
-- Ensure frontend updates respect the semantic Teal design system (`bg-card`, `text-foreground`, `bg-primary`, etc.).
-- Run the app locally to test your dark/light mode compatibility.
+The pipeline runs `black` + `isort` for Python, and `prettier` + `eslint` for TypeScript. Just commit normally — formatting is automatic.
 
-**3. Commit your changes**
-Upon running `git commit`, `pre-commit` will automatically format your code using:
-- `black` & `isort` for Python
-- `prettier` for Frontend formatting
-- `eslint` for Frontend linting
+When editing frontend components, use the semantic design tokens (`bg-card`, `text-foreground`, `bg-primary`, etc.) defined in `frontend/src/index.css`. Test both light and dark mode.
 
-<br>
+## Documentation
 
-<div align="center">
-  <i>Built for absolute financial clarity.</i>
-</div>
+Detailed docs live in the [`docs/`](docs/) folder:
+
+- [Vision](docs/vision.md) — Long-term product direction
+- [V1 Scope](docs/v1-scope.md) — What's in and out for the first release
+- [Domain Model](docs/domain-model.md) — Entity definitions, invariants, and status model
+- [Architecture](docs/architecture.md) — System diagram, module descriptions, and data flows
+- [Decisions](docs/decisions.md) — Durable technical decisions and open questions
