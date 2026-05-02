@@ -4,22 +4,22 @@
   <p><i>Reconcile, Track, and Trust Your Finances</i></p>
 </div>
 
----
+<br>
 
-## ✦ Vision
+## Vision
 
 Neme is a private, trustworthy financial operating system designed to bring together the major parts of your financial life. The first iteration focuses squarely on **trust, provenance, and reconciliation**.
 
 Before we build predictive analytics or AI coaching, Neme ensures your ground truth is flawless by seamlessly reconciling your bank statements against your Splitwise expenses.
 
-## ✨ Key Features
+## Key Features
 
 - **Splitwise Reconciliation:** Mirror your Splitwise expenses locally and reconcile them side-by-side with your bank transactions.
 - **Smart Import Engine:** Easily ingest CSV statements (HSBC supported, more coming) with automatic duplicate detection and collision handling.
 - **Semantic Teal Design:** A premium, meticulously crafted interface using **Space Grotesk** and **Space Mono**, with full Light/Dark Mode support powered by Tailwind CSS v4.
 - **Provenance First:** Raw data is preserved. Reconciliations are auditable. Trust is paramount.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Framework:** React 19 + TypeScript + Vite
@@ -33,9 +33,7 @@ Before we build predictive analytics or AI coaching, Neme ensures your ground tr
 - **Data Processing:** Pandas
 - **Integrations:** Splitwise API
 
----
-
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 ```bash
@@ -70,9 +68,7 @@ npm run dev
 ```
 The application will launch at `http://localhost:5173`.
 
----
-
-## 🤝 Contributing & Code Quality
+## Contributing & Code Quality
 
 Neme maintains strict code quality standards to ensure trust and reliability. We use a unified `pre-commit` pipeline to format both the Python backend and the TypeScript frontend.
 
@@ -92,7 +88,8 @@ Upon running `git commit`, `pre-commit` will automatically format your code usin
 - `prettier` for Frontend formatting
 - `eslint` for Frontend linting
 
----
+<br>
+
 <div align="center">
-  <i>Built with 🩵 for absolute financial clarity.</i>
+  <i>Built for absolute financial clarity.</i>
 </div>
