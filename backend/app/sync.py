@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from dateutil import parser
 from sqlalchemy.orm import Session

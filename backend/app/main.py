@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
