@@ -2,7 +2,7 @@
 
 This document describes the technical architecture of Neme.
 
-## System overview
+## System Overview
 
 Neme is a two-tier application with a Python backend and a React frontend, both running locally. There is no cloud deployment — all data stays on your machine.
 
@@ -26,7 +26,7 @@ Neme is a two-tier application with a Python backend and a React frontend, both 
 │    import_engine.py   — CSV ingestion pipeline      │
 │    sync.py            — Splitwise mirror sync       │
 │    splitwise.py       — OAuth + API client          │
-│    parsers/           — Bank-specific CSV parsers   │
+│    parsers/           — Bank-specific statement parsers│
 │    models.py          — SQLAlchemy ORM models       │
 │    database.py        — Session factory             │
 ├─────────────────────────────────────────────────────┤
@@ -41,7 +41,7 @@ Neme is a two-tier application with a Python backend and a React frontend, both 
 └─────────────────────────────────────────────────────┘
 ```
 
-## Backend modules
+## Backend Modules
 
 ### `main.py`
 
@@ -74,9 +74,12 @@ Handles Splitwise expense mirroring. Fetches expenses from the API, upserts the 
 
 ### `parsers/`
 
-Bank-specific CSV parsers. Each parser implements a common interface that takes raw bytes and returns a list of parsed transaction dicts. Currently supported: HSBC.
+Bank-specific statement parsers. Each parser implements a common interface that takes raw bytes and returns a list of standardized transaction objects. All parsers use a global `clean_counterparty` utility to normalize cryptic bank descriptions into human-readable merchant names.
 
-## Frontend components
+- **Currently Supported:** HSBC (CSV), Axis Bank (Excel), ICICI Bank (Excel .xls), Kotak Bank (MT940).
+- For detailed technical implementation and cleaning heuristics, see [BANK_PARSERS.md](BANK_PARSERS.md).
+
+## Frontend Components
 
 ### `App.tsx`
 
@@ -95,7 +98,7 @@ Modal for creating a new Splitwise expense from a selected transaction. Supports
 
 Modal for uploading CSV bank statements. Supports bank selection, account ID input, and drag-and-drop file upload.
 
-## Design system
+## Design System
 
 The UI uses a semantic variable architecture defined in `index.css`:
 
@@ -105,28 +108,28 @@ The UI uses a semantic variable architecture defined in `index.css`:
 - Typography: Space Grotesk (sans-serif) and Space Mono (monospace)
 - Primary accent: Teal (`hsl(171, 76%, 41%)`)
 
-## Data flow
+## Data Flow
 
-### Import flow
+### Import Flow
 
 ```text
 CSV file → UploadModal → POST /api/import → Parser → ImportEngine → SQLite
 ```
 
-### Sync flow
+### Sync Flow
 
 ```text
 POST /api/sync/splitwise → SplitwiseClient → sync.py → SQLite (upsert + stale detection)
 ```
 
-### Reconciliation flow
+### Reconciliation Flow
 
 ```text
 GET /api/reconciliation/data → Dashboard renders both columns + heuristic suggestions
 User clicks suggestion → Both items selected → Click "Link Records" → POST /api/reconciliation/link
 ```
 
-### Quick-create flow
+### Quick-Create Flow
 
 ```text
 User selects 1 txn → Click "Quick Create" → Modal → POST /api/reconciliation/quick-create

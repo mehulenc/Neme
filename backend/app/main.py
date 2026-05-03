@@ -142,7 +142,9 @@ def get_splitwise_expenses(
 from fastapi import File, Form, UploadFile
 
 from .import_engine import process_import
+from .parsers.axis import AxisParser
 from .parsers.hsbc import HSBCParser
+from .parsers.icici import ICICIParser
 
 
 @app.post("/api/import")
@@ -156,6 +158,14 @@ async def import_transactions(
 
     if source_type == "hsbc":
         parser = HSBCParser()
+    elif source_type == "axis":
+        parser = AxisParser()
+    elif source_type == "icici":
+        parser = ICICIParser()
+    elif source_type == "kotak_mt940":
+        from .parsers.mt940 import MT940Parser
+
+        parser = MT940Parser()
     else:
         raise HTTPException(
             status_code=400, detail=f"Unsupported source type: {source_type}"

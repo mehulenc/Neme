@@ -31,3 +31,39 @@ This file records durable decisions that should not be casually changed during i
 - Exact status transition rules for reconciliation (state machine formalization).
 - How to handle multi-currency reconciliation (e.g. INR transaction matching a USD Splitwise expense) — currently, UI supports dynamic symbols, but cross-currency amount matching requires a conversion engine.
 - Whether to support one-to-many linking in the UI (backend supports it, frontend currently does one-to-one).
+
+---
+
+## ADR 007: MT940 Support for Bank Statements
+
+**Date**: 2026-05-03
+**Status**: Accepted
+
+**Context**:
+Many banks (like Kotak) provide MT940 exports. While CSV is human-readable, it is brittle. MT940 is a standardized SWIFT format used globally for bank statements.
+
+**Decision**:
+We will support MT940 as the professional standard for bank statement imports in Neme. We will use the `mt940` Python library for robust parsing.
+
+**Consequences**:
+- More reliable automated reconciliation.
+- Standardized parser can be reused for multiple banks.
+- Users can import professional-grade statements directly.
+
+---
+
+## ADR 008: Sanitized Test Environment
+
+**Date**: 2026-05-03
+**Status**: Accepted
+
+**Context**:
+When demonstrating the application or conducting development tests, using real financial data is a security risk. We need a way to verify UI and logic with realistic but anonymous data.
+
+**Decision**:
+We will support a dedicated "Test Environment" mode. By setting `DATABASE_URL` to `test.db`, the system will point to a sanitized database. We will maintain a script (`scripts/generate_test_data.py`) to populate this database with anonymized "John Doe" style records that mimic real financial patterns.
+
+**Consequences**:
+- Safe demonstration of the product without leaking personal data.
+- Faster development iteration with controlled data sets.
+- Consistent fixture data for automated UI testing.

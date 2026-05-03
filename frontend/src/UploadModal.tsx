@@ -95,12 +95,9 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
                     className="w-full border border-border bg-background rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="hsbc">HSBC (CSV)</option>
-                    <option value="icici" disabled>
-                      ICICI (Coming soon)
-                    </option>
-                    <option value="axis" disabled>
-                      Axis Bank (Coming soon)
-                    </option>
+                    <option value="icici">ICICI Bank (Excel .xls)</option>
+                    <option value="axis">Axis Bank (Excel)</option>
+                    <option value="kotak_mt940">Kotak Bank (MT940)</option>
                   </select>
                 </div>
 
@@ -122,7 +119,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
 
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-1">
-                    CSV Statement File
+                    Statement File
                   </label>
                   <div
                     onClick={() => fileInputRef.current?.click()}
@@ -136,7 +133,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileChange}
-                      accept=".csv"
+                      accept=".csv,.xlsx,.xls,.txt"
                       className="hidden"
                     />
 
@@ -161,7 +158,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
                           Click to browse or drag file here
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Supports standard CSV exports
+                          Supports CSV and Excel exports
                         </p>
                       </div>
                     )}
@@ -223,7 +220,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="h-4 w-4 mr-2" /> Upload CSV
+                    <UploadCloud className="h-4 w-4 mr-2" /> Import Statement
                   </>
                 )}
               </button>

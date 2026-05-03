@@ -4,14 +4,14 @@ This document defines the stable core entities and relationships for the system.
 
 The purpose of this model is to support a trustworthy financial ledger, reconciliation with Splitwise, and future expansion without redesigning the fundamentals later.
 
-## Core principles
+## Core Principles
 
 - Money must never be stored as floating point. Use integer minor units for all monetary values.
 - Preserve import provenance. Treat imported data as source material, not as mutable truth.
 - Keep reconciliation state explicit.
 - Prefer normalized entities over string blobs when a thing needs to be queried, filtered, or related.
 
-## Currency and money
+## Currency and Money
 
 All monetary amounts are stored as:
 
@@ -84,7 +84,7 @@ Key-value store for runtime configuration.
 
 Currently stores: `splitwise_access_token`, `splitwise_user_id`, `last_splitwise_sync`
 
-## Important invariants
+## Important Invariants
 
 - A transaction must belong to exactly one account.
 - An import batch must belong to exactly one account.
@@ -94,17 +94,17 @@ Currently stores: `splitwise_access_token`, `splitwise_user_id`, `last_splitwise
 - Splitwise mirror data should be refreshable without destroying local reconciliation state.
 - When a remote Splitwise expense changes its amount or date, active links are flagged as `STALE_REVIEW_REQUIRED`.
 
-## Deduplication model
+## Deduplication Model
 
-### Exact import duplicate
+### Exact Import Duplicate
 
 A row that has already been imported from the same source context. Detected using source file identity, account identity, and raw row fingerprint.
 
-### Semantic duplicate
+### Semantic Duplicate
 
 A transaction that is suspiciously similar to another transaction. This is a weaker, human-review concept and should not be treated as the same as exact deduplication.
 
-## Reconciliation status model
+## Reconciliation Status Model
 
 - `UNMATCHED` — No link exists.
 - `MATCHED` — One or more active reconciliation links exist.

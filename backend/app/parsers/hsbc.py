@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from .base import BankParser
+from .utils import clean_counterparty
 
 
 class HSBCParser(BankParser):
@@ -39,9 +40,11 @@ class HSBCParser(BankParser):
             if match:
                 prefix = raw_desc[: match.start()].strip()
                 # Remove trailing 3 letter country/state code if present (e.g., IND, NLD, HAR)
-                counterparty = re.sub(r"\s+[A-Z]{3}$", "", prefix).strip()
+                counterparty_raw = re.sub(r"\s+[A-Z]{3}$", "", prefix).strip()
             else:
-                counterparty = raw_desc[:50]
+                counterparty_raw = raw_desc[:50]
+
+            counterparty = clean_counterparty(counterparty_raw)
 
             raw_row = {
                 "Date": str(row["Date"]),

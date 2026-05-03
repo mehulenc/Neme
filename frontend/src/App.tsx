@@ -517,7 +517,7 @@ export default function App() {
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        {exp.users_data && (
+                        {Array.isArray(exp.users_data) && (
                           <div className="flex -space-x-1.5">
                             {exp.users_data
                               .slice(0, 3)
@@ -565,7 +565,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {isExpanded && exp.users_data && (
+                    {isExpanded && Array.isArray(exp.users_data) && (
                       <div className="mt-4 pt-4 border-t border-border/50 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">
                           Split Details

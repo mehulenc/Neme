@@ -50,6 +50,10 @@ dist-ssr/
 
 # CSV / financial data — never commit raw data exports
 *.csv
+*.xlsx
+*.xls
+*.pdf
+*.txt
 
 # Lint / build artifacts
 frontend/lint.txt

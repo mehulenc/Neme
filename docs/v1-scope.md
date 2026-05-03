@@ -5,7 +5,7 @@ This document defines the strict boundary for the first useful version of the ap
 The goal of V1 is not to build the full financial operating system.
 The goal is to make Splitwise reconciliation fast, trustworthy, and low-friction.
 
-## V1 goal
+## V1 Goal
 
 Build a private financial app that can:
 
@@ -15,11 +15,11 @@ Build a private financial app that can:
 - Preserve provenance and history
 - Support basic tagging and categorization
 
-## In scope for V1
+## In Scope for V1
 
-### Data ingestion
+### Data Ingestion
 
-- CSV import for a small set of specific statement formats (HSBC supported)
+- Bank statement import (HSBC, Axis, ICICI, Kotak supported)
 - Import batch tracking
 - Source file preservation
 - Parser version tracking
@@ -48,7 +48,7 @@ Build a private financial app that can:
     - Personalized profile pictures from Splitwise data
     - Optimized selection logic (Escape to deselect, click-outside, recommendation auto-selection)
 
-### Basic metadata
+### Basic Metadata
 
 - Tags
 - Categories
@@ -63,7 +63,7 @@ Build a private financial app that can:
 - Audit-friendly raw data storage
 - Structured logging for import and sync failures
 
-## Out of scope for V1
+## Out of Scope for V1
 
 - Investment tracking
 - Portfolio analytics
@@ -81,7 +81,7 @@ Build a private financial app that can:
 - Public multi-user support
 - Cloud-hosted SaaS architecture
 
-## UI priority for V1
+## UI Priority for V1
 
 The interface must be optimized for:
 
@@ -98,6 +98,6 @@ The first screen should help you understand:
 - What is personal
 - What needs attention now
 
-## Non-negotiable rule
+## Non-Negotiable Rule
 
 If a feature does not directly improve import reliability or reconciliation speed, it is not a V1 feature unless explicitly required to support those workflows.
