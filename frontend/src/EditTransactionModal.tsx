@@ -66,7 +66,14 @@ export default function EditTransactionModal({
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
       <div className="bg-card text-card-foreground rounded-2xl shadow-2xl w-full max-w-md flex flex-col">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/50 rounded-t-2xl">
-          <h2 className="text-lg font-bold">Edit Transaction</h2>
+          <h2 className="text-lg font-bold">
+            Edit Transaction{" "}
+            {transaction.institution && (
+              <span className="text-muted-foreground font-normal">
+                • {transaction.institution}
+              </span>
+            )}
+          </h2>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-full">
             <X className="h-5 w-5" />
           </button>

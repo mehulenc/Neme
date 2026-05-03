@@ -99,6 +99,21 @@ python scripts/generate_test_data.py  # If script exists
 
 This ensures no sensitive financial information is exposed during testing or screenshots.
 
+## Local Development
+
+The easiest way to run the entire stack is using the included launcher:
+
+```bash
+python neme.py
+```
+
+This will:
+1. Start the FastAPI backend (port 8000).
+2. Start the Vite frontend.
+3. Stream all logs to your terminal with color-coded tags.
+
+Once started, access the app via the **Vite URL** displayed in the logs (usually `http://localhost:5173`).
+
 ## Contributing
 
 Pre-commit hooks enforce formatting on every commit:

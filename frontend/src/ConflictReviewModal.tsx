@@ -6,6 +6,7 @@ interface Transaction {
   amount_minor_units: number;
   counterparty: string;
   status: string;
+  institution?: string;
 }
 
 interface Expense {
@@ -103,7 +104,12 @@ export default function ConflictReviewModal({
                       {conflict.expense.description}
                     </h3>
                     <p className="text-xs text-muted-foreground font-medium">
-                      Matched with {conflict.transaction.counterparty}
+                      Matched with {conflict.transaction.counterparty}{" "}
+                      {conflict.transaction.institution && (
+                        <span className="opacity-70">
+                          • {conflict.transaction.institution}
+                        </span>
+                      )}
                     </p>
                   </div>
                   <div className="flex gap-2">

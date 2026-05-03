@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from . import database, models
 from .heuristics import compute_suggestions
@@ -16,13 +16,22 @@ def get_dashboard_data(db: Session = Depends(database.get_db)):
     # Fetch recent transactions and expenses regardless of status
     transactions = (
         db.query(models.Transaction)
-        .order_by(models.Transaction.transaction_date.desc())
+        .options(joinedload(models.Transaction.account))
+        .order_by(models.Transaction.transaction_date.asc())
         .limit(300)
         .all()
     )
+
+    # Transform transactions to include account info in the response
+    transaction_list = []
+    for t in transactions:
+        t_dict = {c.name: getattr(t, c.name) for c in t.__table__.columns}
+        t_dict["institution"] = t.account.institution if t.account else "Unknown"
+        transaction_list.append(t_dict)
+
     expenses = (
         db.query(models.SplitwiseExpense)
-        .order_by(models.SplitwiseExpense.expense_date.desc())
+        .order_by(models.SplitwiseExpense.expense_date.asc())
         .limit(300)
         .all()
     )
@@ -46,7 +55,7 @@ def get_dashboard_data(db: Session = Depends(database.get_db)):
     )
 
     return {
-        "transactions": transactions,
+        "transactions": transaction_list,
         "expenses": expenses,
         "suggested_matches": suggested_matches,
         "splitwise_user_id": splitwise_user_id,

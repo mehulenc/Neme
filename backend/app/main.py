@@ -171,12 +171,87 @@ async def import_transactions(
             status_code=400, detail=f"Unsupported source type: {source_type}"
         )
 
-    parsed_transactions = parser.parse(content)
+    if source_type == "kotak_mt940":
+        parsed_transactions, mt940_meta = parser.parse_with_metadata(content)
+
+        # Persist closing balance to system settings
+        closing = mt940_meta.get("closing_balance")
+        if closing:
+            for key, val in {
+                "kotak_closing_balance_minor": str(closing["amount_minor_units"]),
+                "kotak_closing_balance_currency": closing["currency_code"],
+                "kotak_closing_balance_date": closing["balance_date"],
+            }.items():
+                setting = (
+                    db.query(models.SystemSetting)
+                    .filter(models.SystemSetting.key == key)
+                    .first()
+                )
+                if setting:
+                    setting.value = val
+                else:
+                    db.add(models.SystemSetting(key=key, value=val))
+            db.flush()
+    else:
+        parsed_transactions = parser.parse(content)
+        closing = None
+
+    # Ensure account exists
+    account = db.query(models.Account).filter(models.Account.id == account_id).first()
+    if not account:
+        institution_map = {
+            "hsbc": "HSBC",
+            "axis": "Axis Bank",
+            "icici": "ICICI Bank",
+            "kotak_mt940": "Kotak Bank",
+        }
+        institution = institution_map.get(source_type, source_type.upper())
+        account = models.Account(
+            id=account_id,
+            name=f"{institution} ({account_id})",
+            institution=institution,
+            currency_code="USD",
+        )
+        db.add(account)
+        db.flush()
+
     inserted, collisions = process_import(
         db, account_id, source_type, file.filename, "1.0", parsed_transactions
     )
 
-    return {"status": "success", "inserted": inserted, "collisions": collisions}
+    response: dict = {
+        "status": "success",
+        "inserted": inserted,
+        "collisions": collisions,
+    }
+    if closing:
+        response["closing_balance"] = closing
+    return response
+
+
+@app.get("/api/accounts/kotak/balance")
+def get_kotak_balance(db: Session = Depends(database.get_db)):
+    """Return the last known Kotak closing balance extracted from an MT940 import."""
+    keys = [
+        "kotak_closing_balance_minor",
+        "kotak_closing_balance_currency",
+        "kotak_closing_balance_date",
+    ]
+    settings = {
+        s.key: s.value
+        for s in db.query(models.SystemSetting)
+        .filter(models.SystemSetting.key.in_(keys))
+        .all()
+    }
+    if "kotak_closing_balance_minor" not in settings:
+        return {"balance": None}
+    return {
+        "balance": {
+            "amount_minor_units": int(settings["kotak_closing_balance_minor"]),
+            "currency_code": settings.get("kotak_closing_balance_currency", "INR"),
+            "balance_date": settings.get("kotak_closing_balance_date"),
+        }
+    }
 
 
 @app.get("/api/transactions")
@@ -185,9 +260,17 @@ def get_transactions(
 ):
     transactions = (
         db.query(models.Transaction)
-        .order_by(models.Transaction.transaction_date.desc())
+        .options(joinedload(models.Transaction.account))
+        .order_by(models.Transaction.transaction_date.asc())
         .offset(offset)
         .limit(limit)
         .all()
     )
-    return {"transactions": transactions}
+
+    transaction_list = []
+    for t in transactions:
+        t_dict = {c.name: getattr(t, c.name) for c in t.__table__.columns}
+        t_dict["institution"] = t.account.institution if t.account else "Unknown"
+        transaction_list.append(t_dict)
+
+    return {"transactions": transaction_list}

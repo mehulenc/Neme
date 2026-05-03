@@ -60,10 +60,10 @@ def process_import(
             import_batch_id=batch.id,
             transaction_date=pt["transaction_date"],
             amount_minor_units=pt["amount_minor_units"],
-            currency_code=pt["currency_code"],
-            counterparty=pt["counterparty"],
-            raw_description=pt["raw_description"],
-            raw_row_data=pt["raw_row_data"],
+            currency_code=pt.get("currency_code", "USD"),
+            counterparty=pt.get("counterparty", "Unknown"),
+            raw_description=pt.get("raw_description", ""),
+            raw_row_data=pt.get("raw_row_data", {}),
         )
         db.add(txn)
         inserted_count += 1

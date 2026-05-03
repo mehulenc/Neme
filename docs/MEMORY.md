@@ -34,13 +34,23 @@ This document tracks the evolving logic, key technical learnings, and milestone 
 - **Heuristic Engine**: Use a ±2 day date window and ±5.00 units tolerance for amount matching to account for bank processing delays and minor currency rounding.
 - **Conflict Review**: Stale links are handled by freezing the current link and requiring a manual "Approve" or "Dismiss" action. This prevents remote updates from silently changing local reconciliation history.
 - **Manual Edits**: When a user edits a transaction (e.g., fixes a merchant name), we flag it as `is_edited`. The original description is preserved in `raw_description` to maintain auditability.
+- **Unified Transaction Feed**: Instead of siloing transactions by bank, present a single chronological feed with source badges (institutions). This provides a holistic view of financial activity.
+- **Dynamic Account Mapping**: Use a convention-over-configuration approach for statement imports (e.g., mapping `hsbc` to `hsbc-main` by default) to minimize user input for repetitive tasks.
+- **On-Demand Authentication**: If external integrations (Splitwise) are disconnected, provide a non-intrusive UI prompt with a direct OAuth "Login" path instead of showing empty lists or generic errors.
 
 ## Design Decisions
 - **Transparency**: Matched items should always show what they are linked to, even if they are "stricken off" in the list. This provides an audit trail for the user.
 - **Personalization**: Using real profile pictures instead of generic icons significantly improves the "premium" feel of a finance app.
 - **Bi-Directional Navigation**: Users should be able to "jump" between matched counterparts (Bank -> Splitwise and vice-versa) directly from the item details or action bar.
+- **Chronological Primary Sort**: For financial reconciliation, chronological ordering (Ascending) is the most intuitive as it follows the "story" of the user's spending.
 
 ## Milestone Memories
+
+### 2026-05-03: Unified Transaction Operating System
+- **Feature**: Transitioned to the "All Transactions" view with institution badges.
+- **UX**: Unified the "Import Statement" workflow with intelligent Account ID defaults.
+- **Auth**: Implemented a visual Splitwise authentication prompt for unauthenticated users.
+- **Data**: Updated data fetching to use `joinedload` on the Transaction/Account relationship for optimized unified views.
 
 ### 2026-05-03: Professional Parser Support
 - **Feature**: Added support for Kotak MT940 (SWIFT) statements.

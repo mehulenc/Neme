@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   X,
   UploadCloud,
@@ -15,8 +15,19 @@ interface UploadModalProps {
 
 export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
   const [file, setFile] = useState<File | null>(null);
-  const [accountId, setAccountId] = useState("hsbc-main");
   const [sourceType, setSourceType] = useState("hsbc");
+  const [accountId, setAccountId] = useState("hsbc-main");
+
+  // Dynamic defaults based on source type
+  useEffect(() => {
+    const defaults: Record<string, string> = {
+      hsbc: "hsbc-main",
+      icici: "icici-savings",
+      axis: "axis-credit",
+      kotak_mt940: "kotak-primary",
+    };
+    setAccountId(defaults[sourceType] || "");
+  }, [sourceType]);
 
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -71,7 +82,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
       <div className="bg-card text-card-foreground rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/50">
           <h2 className="text-lg font-bold text-card-foreground">
-            Import Bank Transactions
+            Import Statement
           </h2>
           <button
             onClick={onClose}
@@ -87,7 +98,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-1">
-                    Source Bank
+                    Source Type
                   </label>
                   <select
                     value={sourceType}

@@ -12,6 +12,7 @@ from sqlalchemy import (
     Integer,
     String,
 )
+from sqlalchemy.orm import relationship
 
 from .database import Base
 
@@ -57,6 +58,8 @@ class Transaction(Base):
     )  # UNMATCHED, MATCHED, PERSONAL, IGNORED
     is_edited = Column(Boolean, default=False, nullable=False)
     notes = Column(String, nullable=True)
+
+    account = relationship("Account", backref="transactions")
 
 
 class SplitwiseExpense(Base):

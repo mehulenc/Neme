@@ -64,3 +64,8 @@ test_regex.py
 # OS
 .DS_Store
 Thumbs.db
+
+# Neme launcher logs
+.backend.log
+.frontend.log
+neme_*.Caddyfile

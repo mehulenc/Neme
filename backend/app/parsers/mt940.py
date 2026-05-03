@@ -1,5 +1,6 @@
+import re
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 import mt940
 
@@ -7,21 +8,57 @@ from .base import BankParser
 from .utils import clean_counterparty
 
 
-class MT940Parser(BankParser):
-    def parse(self, file_content: bytes) -> List[Dict[str, Any]]:
-        # MT940 library expects a string
-        content_str = file_content.decode("utf-8", errors="ignore")
+def _parse_balance_tag(content_str: str, tag: str) -> Optional[Dict[str, Any]]:
+    """
+    Extract balance info from MT940 tags like :60F: and :62F:.
+    Format: C/D YYMMDD CURRENCY AMOUNT (e.g. C260503INR50328,46)
+    """
+    pattern = rf":{re.escape(tag)}:([CD])(\d{{6}})([A-Z]{{3}})([\d,]+)"
+    match = re.search(pattern, content_str)
+    if not match:
+        return None
+    sign, date_str, currency, amount_str = match.groups()
+    try:
+        balance_date = datetime.strptime(date_str, "%y%m%d").date()
+        amount = float(amount_str.replace(",", "."))
+        # Negative for debit (D) balance (overdraft)
+        if sign == "D":
+            amount = -amount
+        return {
+            "amount_minor_units": int(amount * 100),
+            "currency_code": currency,
+            "balance_date": balance_date.isoformat(),
+        }
+    except (ValueError, TypeError):
+        return None
 
+
+class MT940Parser(BankParser):
+    def parse(self, file_content: bytes) -> List[Dict[str, Any]]:  # type: ignore[override]
+        result, _ = self.parse_with_metadata(file_content)
+        return result
+
+    def parse_with_metadata(
+        self, file_content: bytes
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         import os
         import tempfile
 
-        # Strip SWIFT headers if present
-        if "{4:" in content_str:
-            content_str = content_str.split("{4:")[1].split("-}")[0].strip()
+        # MT940 library expects a string
+        content_str = file_content.decode("utf-8", errors="ignore")
 
-        # Use a temporary file because the library seems to expect a filename
+        # Extract raw block before stripping headers (need full content for balance tags)
+        raw_block = content_str
+        if "{4:" in content_str:
+            raw_block = content_str.split("{4:")[1].split("-}")[0].strip()
+
+        # Extract closing balance (:62F:) and opening balance (:60F:) from raw block
+        closing_balance = _parse_balance_tag(raw_block, "62F")
+        opening_balance = _parse_balance_tag(raw_block, "60F")
+
+        # Use a temporary file because the library expects a filename, not a string
         with tempfile.NamedTemporaryFile(mode="w", suffix=".sta", delete=False) as tmp:
-            tmp.write(content_str)
+            tmp.write(raw_block)
             tmp_path = tmp.name
 
         try:
@@ -29,7 +66,7 @@ class MT940Parser(BankParser):
             statements = mt.statements
         except Exception as e:
             print(f"MT940 Library Error: {e}")
-            return []
+            return [], {}
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
@@ -56,16 +93,49 @@ class MT940Parser(BankParser):
                 if not dt:
                     continue
 
+                # Ensure it's a date object (some versions of mt940 return strings)
+                if isinstance(dt, str):
+                    try:
+                        dt = datetime.strptime(dt, "%y%m%d").date()
+                    except ValueError:
+                        try:
+                            dt = datetime.fromisoformat(dt).date()
+                        except ValueError:
+                            continue
+
+                # Use closing balance currency if available, else opening, else default to INR
+                currency = "INR"
+                if closing_balance:
+                    currency = closing_balance["currency_code"]
+                elif opening_balance:
+                    currency = opening_balance["currency_code"]
+
+                # Robust raw data extraction
+                raw_row = {}
+                if hasattr(transaction, "data"):
+                    raw_row = transaction.data
+                elif hasattr(transaction, "__dict__"):
+                    # Filter out non-serializable objects if necessary
+                    raw_row = {
+                        k: str(v)
+                        for k, v in transaction.__dict__.items()
+                        if not k.startswith("_")
+                    }
+
                 tx_data = {
-                    "transaction_date": (
-                        dt.isoformat() if hasattr(dt, "isoformat") else str(dt)
-                    ),
+                    "transaction_date": dt,
                     "amount_minor_units": amount_minor,
+                    "currency_code": currency,
                     "raw_description": raw_description,
                     "counterparty": counterparty,
+                    "raw_row_data": raw_row,
                     "category": "Uncategorized",
                 }
 
                 parsed_transactions.append(tx_data)
 
-        return parsed_transactions
+        metadata = {
+            "closing_balance": closing_balance,
+            "opening_balance": opening_balance,
+        }
+        return parsed_transactions, metadata
