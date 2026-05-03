@@ -98,7 +98,9 @@ export default function App() {
   }
   const [kotakBalance, setKotakBalance] = useState<KotakBalance | null>(null);
   const [isSplitwiseAuth, setIsSplitwiseAuth] = useState(true);
-  const [syncDate, setSyncDate] = useState("");
+  const [syncDate, setSyncDate] = useState(
+    () => `${new Date().getFullYear()}-01-01`,
+  );
   const [syncing, setSyncing] = useState(false);
 
   const [currencyMap] = useState<Record<string, string>>({

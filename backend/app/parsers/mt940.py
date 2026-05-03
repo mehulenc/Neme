@@ -47,18 +47,10 @@ class MT940Parser(BankParser):
         # MT940 library expects a string
         content_str = file_content.decode("utf-8", errors="ignore")
 
-        # Extract raw block before stripping headers (need full content for balance tags)
-        raw_block = content_str
-        if "{4:" in content_str:
-            raw_block = content_str.split("{4:")[1].split("-}")[0].strip()
-
-        # Extract closing balance (:62F:) and opening balance (:60F:) from raw block
-        closing_balance = _parse_balance_tag(raw_block, "62F")
-        opening_balance = _parse_balance_tag(raw_block, "60F")
-
         # Use a temporary file because the library expects a filename, not a string
+        # We use the full content_str because the file may contain multiple statements
         with tempfile.NamedTemporaryFile(mode="w", suffix=".sta", delete=False) as tmp:
-            tmp.write(raw_block)
+            tmp.write(content_str)
             tmp_path = tmp.name
 
         try:
@@ -70,6 +62,44 @@ class MT940Parser(BankParser):
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
+
+        # Extract opening/closing balances from the library's parsed statements
+        # We want the FIRST opening balance and the LAST closing balance in the file
+        opening_balance = None
+        closing_balance = None
+
+        if statements:
+            # Opening balance from the first statement (tag :60F: or :60M:)
+            first_stmt = statements[0]
+            ob = first_stmt.data.get("final_opening_balance") or first_stmt.data.get(
+                "intermediate_opening_balance"
+            )
+            if ob:
+                opening_balance = {
+                    "amount_minor_units": int(float(ob.amount) * 100),
+                    "currency_code": ob.currency,
+                    "balance_date": (
+                        ob.date.isoformat()
+                        if hasattr(ob.date, "isoformat")
+                        else str(ob.date)
+                    ),
+                }
+
+            # Closing balance from the last statement (tag :62F: or :62M:)
+            last_stmt = statements[-1]
+            cb = last_stmt.data.get("final_closing_balance") or last_stmt.data.get(
+                "intermediate_closing_balance"
+            )
+            if cb:
+                closing_balance = {
+                    "amount_minor_units": int(float(cb.amount) * 100),
+                    "currency_code": cb.currency,
+                    "balance_date": (
+                        cb.date.isoformat()
+                        if hasattr(cb.date, "isoformat")
+                        else str(cb.date)
+                    ),
+                }
 
         parsed_transactions = []
 
