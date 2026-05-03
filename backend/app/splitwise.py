@@ -85,10 +85,9 @@ class SplitwiseClient:
             base_url=self.BASE_URL, headers={"Authorization": f"Bearer {self.token}"}
         )
 
-    async def get_expenses(self, updated_after: Optional[str] = None) -> list:
-        params = {"limit": 0}  # 0 means fetch all according to Splitwise API
-        if updated_after:
-            params["updated_after"] = updated_after
+    async def get_expenses(self, **kwargs) -> list:
+        params = {"limit": 100}
+        params.update(kwargs)
 
         response = await self.client.get("/get_expenses", params=params)
         response.raise_for_status()

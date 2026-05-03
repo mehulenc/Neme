@@ -17,7 +17,7 @@ def get_dashboard_data(db: Session = Depends(database.get_db)):
     transactions = (
         db.query(models.Transaction)
         .options(joinedload(models.Transaction.account))
-        .order_by(models.Transaction.transaction_date.asc())
+        .order_by(models.Transaction.transaction_date.desc())
         .limit(300)
         .all()
     )
@@ -31,7 +31,7 @@ def get_dashboard_data(db: Session = Depends(database.get_db)):
 
     expenses = (
         db.query(models.SplitwiseExpense)
-        .order_by(models.SplitwiseExpense.expense_date.asc())
+        .order_by(models.SplitwiseExpense.expense_date.desc())
         .limit(300)
         .all()
     )

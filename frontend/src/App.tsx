@@ -98,6 +98,8 @@ export default function App() {
   }
   const [kotakBalance, setKotakBalance] = useState<KotakBalance | null>(null);
   const [isSplitwiseAuth, setIsSplitwiseAuth] = useState(true);
+  const [syncDate, setSyncDate] = useState("");
+  const [syncing, setSyncing] = useState(false);
 
   const [currencyMap] = useState<Record<string, string>>({
     USD: "$",
@@ -127,6 +129,23 @@ export default function App() {
       const id = Array.from(selectedTxnIds)[0];
       const txn = transactions.find((t) => t.id === id);
       if (txn) setQuickCreateTxn(txn);
+    }
+  };
+
+  const handleSyncSplitwise = async () => {
+    setSyncing(true);
+    try {
+      const url = syncDate
+        ? `/api/sync/splitwise?since_date=${syncDate}`
+        : "/api/sync/splitwise";
+      const res = await fetch(url, { method: "POST" });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -267,7 +286,7 @@ export default function App() {
             className="flex items-center px-4 py-2 text-sm font-semibold bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-lg transition"
           >
             <UploadCloud className="h-4 w-4 mr-2" />
-            Upload CSV
+            Upload Statement
           </button>
           <button
             onClick={() => setDarkMode(!darkMode)}
@@ -491,11 +510,36 @@ export default function App() {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="bg-muted/50 px-5 py-4 border-b border-border flex justify-between items-center">
-            <h2 className="font-semibold text-card-foreground">Splitwise</h2>
-            <span className="text-xs font-medium bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
-              {expenses.filter((e) => e.status === "UNMATCHED").length}{" "}
-              Unmatched
-            </span>
+            <div className="flex items-center gap-3">
+              <h2 className="font-semibold text-card-foreground">Splitwise</h2>
+              <span className="text-xs font-medium bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
+                {expenses.filter((e) => e.status === "UNMATCHED").length}{" "}
+                Unmatched
+              </span>
+            </div>
+            {isSplitwiseAuth && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={syncDate}
+                  onChange={(e) => setSyncDate(e.target.value)}
+                  className="text-[11px] bg-background border border-border rounded px-2 py-1 outline-none focus:border-primary transition h-8"
+                  title="Sync expenses dated on or after this date"
+                />
+                <button
+                  onClick={handleSyncSplitwise}
+                  disabled={syncing}
+                  className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition shadow-sm disabled:opacity-50 h-8"
+                >
+                  {syncing ? (
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3 w-3" />
+                  )}
+                  Sync
+                </button>
+              </div>
+            )}
           </div>
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {!isSplitwiseAuth ? (
@@ -528,11 +572,7 @@ export default function App() {
                   No expenses found.
                 </p>
                 <button
-                  onClick={() =>
-                    fetch("/api/sync/splitwise", { method: "POST" }).then(
-                      fetchData,
-                    )
-                  }
+                  onClick={handleSyncSplitwise}
                   className="text-xs font-bold text-primary hover:underline"
                 >
                   Sync Now

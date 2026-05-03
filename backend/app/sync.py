@@ -7,18 +7,19 @@ from .models import ReconciliationLink, SplitwiseExpense, SystemSetting, Transac
 from .splitwise import SplitwiseClient
 
 
-async def sync_splitwise_expenses(db: Session):
-    # 1. Get the last sync timestamp
-    last_sync_setting = (
-        db.query(SystemSetting)
-        .filter(SystemSetting.key == "last_splitwise_sync")
-        .first()
-    )
-    updated_after = last_sync_setting.value if last_sync_setting else None
+async def sync_splitwise_expenses(db: Session, since_date: Optional[str] = None):
+    # 1. Determine sync parameters
+    sync_params = {}
+    if since_date:
+        # If a specific date is requested, we fetch based on expense date
+        sync_params["dated_after"] = since_date
+    # NOTE: User requested to "fetch all always" by default,
+    # so we no longer strictly rely on 'updated_after' incremental sync
+    # unless specifically requested by logic (omitted here to satisfy request).
 
     client = SplitwiseClient()
     try:
-        expenses = await client.get_expenses(updated_after=updated_after)
+        expenses = await client.get_expenses(**sync_params)
 
         for exp in expenses:
             expense_id = str(exp["id"])

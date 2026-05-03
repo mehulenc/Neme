@@ -21,10 +21,10 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
   // Dynamic defaults based on source type
   useEffect(() => {
     const defaults: Record<string, string> = {
-      hsbc: "hsbc-main",
-      icici: "icici-savings",
-      axis: "axis-credit",
-      kotak_mt940: "kotak-primary",
+      hsbc: "hsbc-t1",
+      icici: "icici-sapphiro",
+      axis: "axis-flipkart",
+      kotak_mt940: "kotak-811",
     };
     setAccountId(defaults[sourceType] || "");
   }, [sourceType]);
@@ -82,7 +82,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
       <div className="bg-card text-card-foreground rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/50">
           <h2 className="text-lg font-bold text-card-foreground">
-            Import Statement
+            Upload Statement
           </h2>
           <button
             onClick={onClose}
@@ -231,7 +231,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="h-4 w-4 mr-2" /> Import Statement
+                    <UploadCloud className="h-4 w-4 mr-2" /> Upload Statement
                   </>
                 )}
               </button>

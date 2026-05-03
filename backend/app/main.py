@@ -84,9 +84,11 @@ from .sync import sync_splitwise_expenses
 
 
 @app.post("/api/sync/splitwise")
-async def trigger_splitwise_sync(db: Session = Depends(database.get_db)):
+async def trigger_splitwise_sync(
+    since_date: Optional[str] = None, db: Session = Depends(database.get_db)
+):
     try:
-        count = await sync_splitwise_expenses(db)
+        count = await sync_splitwise_expenses(db, since_date=since_date)
         return {"status": "success", "synced_count": count}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -261,7 +263,7 @@ def get_transactions(
     transactions = (
         db.query(models.Transaction)
         .options(joinedload(models.Transaction.account))
-        .order_by(models.Transaction.transaction_date.asc())
+        .order_by(models.Transaction.transaction_date.desc())
         .offset(offset)
         .limit(limit)
         .all()
